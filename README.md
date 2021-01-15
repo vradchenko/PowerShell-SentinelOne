@@ -23,13 +23,13 @@ Alternatively, download PS1 file and import into PowerShell session `. ./Sentine
 ### Add-S1APIKey
 Prerequisites for all other cmdlets to function is to add at least one API token. Key(s) will be stored by default in a user's profile folder (`$env:APPDATA`) in SentinelOneAPI.key file. Before saving API token is encrypted using .NET [System.Security.Cryptography.ProtectedData](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=dotnet-plat-ext-5.0) class using [CurrentUser](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.dataprotectionscope?view=dotnet-plat-ext-5.0)  data protection scope which means that only threads running under the current user context can unprotect the data. API token is never written to a disk in an unprotected format.
 #### Parameters
-|Parameter|Required|Default|Description|Example
-|--|--|--|--|--|
+|Parameter|Required|Description|Example
+|--|--|--|--|
 |APIKey|Yes||Secret API key (token) generated with SentinelOne console|GrD7dVSMjsSBgVprzA
 |Endpoint|Yes||SentinelOne console URL|https://contoso.sentinelone.net
 |Name|Yes||Shortcut to the API key, will be referenced in all other cmdlets|MyKey1
-|Description|No|API key added %CurrentDate%|Any text you'd like to save along with the key|Key provided by XYZ, expiries DD.MM.YYYY
-|Path|No|`$env:APPDATA`\SentinelOneAPI.key|Path to the encrypted file|C:\Folder\mykeys.api
+|Description|No|Any text you'd like to save along with the key, if not provided a current date will be used|Key provided by XYZ, expiries DD.MM.YYYY
+|Path|No|Path to the encrypted file where a key will be saved. If not provided, a default `$env:APPDATA`\SentinelOneAPI.key will be used|C:\Folder\mykeys.api
 |ValidateKeyBeforeAdding|No|False|Switch to validate added API key before saving. Validation happens by executing /web/api/v2.1/users/api-token-details
 #### Examples
 `Add-S1APIKey -APIKey GrD7dVSMjsSBgVprzA -Name MyKey1 -Endpoint https://contoso.sentinelone.net`
