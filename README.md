@@ -34,7 +34,7 @@ Prerequisites for all other cmdlets to function is to add at least one API token
 #### Examples
 `Add-S1APIKey -APIKey GrD7dVSMjsSBgVprzA -Name MyKey1 -Endpoint https://contoso.sentinelone.net`
 #### Output
-A console message indication whenever a key was added succesfully or not.
+A console message indicatingg whenever a key was added succesfully or not.
 #### Final notes
 You can add as many keys as you want (e.g. keys with different scope or keys from different consoles.
 You cannot modify existing keys or add keys with the same name. If any changes are necessary to the existing key you need to delete it with [Remove-S1APIKey](#Remove-S1APIKey) first.
