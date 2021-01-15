@@ -20,7 +20,6 @@ Alternatively, download PS1 file and import into PowerShell session `. ./Sentine
 - [Get-S1SitePolicy](#Get-S1SitePolicy)
 - [Remove-S1APIKey](#Remove-S1APIKey)
 
-## Cmdlets
 ### Add-S1APIKey
 Prerequisites for all other cmdlets to function is to add at least one API token. Key(s) will be stored by default in a user's profile folder (`$env:APPDATA`) in SentinelOneAPI.key file. Before saving API token is encrypted using .NET [System.Security.Cryptography.ProtectedData](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=dotnet-plat-ext-5.0) class using [CurrentUser](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.dataprotectionscope?view=dotnet-plat-ext-5.0)  data protection scope which means that only threads running under the current user context can unprotect the data. API token is never written to a disk in an unprotected format.
 #### Parameters
