@@ -25,12 +25,12 @@ Prerequisites for all other cmdlets to function is to add at least one API token
 #### Parameters
 |Parameter|Required|Description|Example
 |--|--|--|--|
-|APIKey|Yes||Secret API key (token) generated with SentinelOne console|GrD7dVSMjsSBgVprzA
-|Endpoint|Yes||SentinelOne console URL|https://contoso.sentinelone.net
-|Name|Yes||Shortcut to the API key, will be referenced in all other cmdlets|MyKey1
+|APIKey|Yes|Secret API key (token) generated with SentinelOne console|GrD7dVSMjsSBgVprzA
+|Endpoint|Yes|SentinelOne console URL|https://contoso.sentinelone.net
+|Name|Yes|Shortcut to the API key, will be referenced in all other cmdlets|MyKey1
 |Description|No|Any text you'd like to save along with the key, if not provided a current date will be used|Key provided by XYZ, expiries DD.MM.YYYY
 |Path|No|Path to the encrypted file where a key will be saved. If not provided, a default `$env:APPDATA`\SentinelOneAPI.key will be used|C:\Folder\mykeys.api
-|ValidateKeyBeforeAdding|No|False|Switch to validate added API key before saving. Validation happens by executing /web/api/v2.1/users/api-token-details
+|ValidateKeyBeforeAdding|No|Switch to validate added API key before saving. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate
 #### Examples
 `Add-S1APIKey -APIKey GrD7dVSMjsSBgVprzA -Name MyKey1 -Endpoint https://contoso.sentinelone.net`
 #### Output
