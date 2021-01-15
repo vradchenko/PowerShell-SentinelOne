@@ -23,21 +23,21 @@ Alternatively, download PS1 file and import into PowerShell session `. ./Sentine
 ### Add-S1APIKey
 Prerequisites for all other cmdlets to function is to add at least one API token. Key(s) will be stored by default in a user's profile folder (`$env:APPDATA`) in SentinelOneAPI.key file. Before saving API token is encrypted using .NET [System.Security.Cryptography.ProtectedData](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=dotnet-plat-ext-5.0) class using [CurrentUser](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.dataprotectionscope?view=dotnet-plat-ext-5.0)  data protection scope which means that only threads running under the current user context can unprotect the data. API token is never written to a disk in an unprotected format.
 #### Parameters
-|Parameter|Required|Description|Example
+|Parameter|Required|Description|Example|
 |--|--|--|--|
-|APIKey|Yes|Secret API key (token) generated with SentinelOne console|GrD7dVSMjsSBgVprzA
-|Endpoint|Yes|SentinelOne console URL|https://contoso.sentinelone.net
-|Name|Yes|Shortcut to the API key, will be referenced in all other cmdlets|MyKey1
-|Description|No|Any text you'd like to save along with the key, if not provided a current date will be used|Key provided by XYZ, expiries DD.MM.YYYY
-|Path|No|Path to the encrypted file where a key will be saved. If not provided, a default `$env:APPDATA`\SentinelOneAPI.key will be used|C:\Folder\mykeys.api
-|ValidateKeyBeforeAdding|No|Switch to validate added API key before saving. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate
+|APIKey|Yes|Secret API key (token) generated with SentinelOne console|GrD7dVSMjsSBgVprzA|
+|Endpoint|Yes|SentinelOne console URL|https://contoso.sentinelone.net|
+|Name|Yes|Shortcut to the API key, will be referenced in all other cmdlets|MyKey1|
+|Description|No|Any text you'd like to save along with the key, if not provided a current date will be used|Key provided by XYZ, expiries DD.MM.YYYY|
+|Path|No|Path to the encrypted file where a key will be saved. If not provided, a default `$env:APPDATA`\SentinelOneAPI.key will be used|C:\Folder\mykeys.api|
+|ValidateKeyBeforeAdding|No|Switch to validate added API key before saving. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate|
 #### Examples
 `Add-S1APIKey -APIKey GrD7dVSMjsSBgVprzA -Name MyKey1 -Endpoint https://contoso.sentinelone.net`
 #### Output
 A console message indicatingg whenever a key was added succesfully or not.
 #### Final notes
 You can add as many keys as you want (e.g. keys with different scope or keys from different consoles.
-You cannot modify existing keys or add keys with the same name. If any changes are necessary to the existing key you need to delete it with [Remove-S1APIKey](#Remove-S1APIKey) first.
+You cannot modify existing keys or add keys with the same name. If any changes are necessary to the existing key you need to delete it with [`Remove-S1APIKey`](#Remove-S1APIKey) first.
 
 
 ### Invoke-S1FileFetch
@@ -45,6 +45,25 @@ You cannot modify existing keys or add keys with the same name. If any changes a
 ### Get-S1Agents
 
 ### Get-S1APIKey
+Lists and get details of all currently saved and API keys
+#### Parameters
+|Parameter|Required|Description|Example|
+|--|--|--|--|
+|Name|No|Key name to get details for, default is to show all keys (`-Name *`)|MyKey1|
+|Path|No|Path to the encrypted file frpm where a key will be read. If not provided, a default `$env:APPDATA`\SentinelOneAPI.key will be used|C:\Folder\mykeys.api|
+|ValidateKey|No|Switch to validate saved API key. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate||
+|UnmaskKey|No|Switch to show full API key on the screen. If not provided showed key will be masked||
+#### Examples
+`Get-S1APIKey -Name MyKey1`
+
+`Get-S1APIKey -Name *`
+
+`Get-S1APIKey`
+#### Output
+An object showing details of the saved key(s).
+
+
+
 
 ### Get-S1DeepVisibility
 
