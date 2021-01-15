@@ -32,7 +32,7 @@ Prerequisites for all other cmdlets to function is to add at least one API token
 |Path|No|A full path to the encrypted file where a key will be saved. If not provided, a default AppData folder and SentinelOneAPI.key filename will be used|
 |ValidateKeyBeforeAdding|No|Switch to validate added API key before saving. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate|
 #### Examples
-`Add-S1APIKey -APIKey GrD7dVSMjsSBgVprzA -Name MyKey1 -Endpoint https://contoso.sentinelone.net`
+`Add-S1APIKey -APIKey FeA1KIEfKZE3nYog4dafQfcMg7kTqwktKRrRjKUt99U4rkLz1KZrW7dOLFjsLUgOprzT2bsCc41qbRPv -Name MyKey1 -Endpoint https://contoso.sentinelone.net`
 #### Output
 A console message indicatingg whenever a key was added succesfully or not.
 #### Final notes
@@ -47,12 +47,12 @@ You cannot modify existing keys or add keys with the same name. If any changes a
 ### Get-S1APIKey
 Lists and gets details of all currently saved API keys
 #### Parameters
-|Parameter|Required|Description|Example|
-|--|--|--|--|
-|Name|No|API key name to get details for; default is to show all keys (equals to `-Name *`)|MyKey1|
-|Path|No|Path to the encrypted file frpm where a key will be read. If not provided, a default `$env:APPDATA`\SentinelOneAPI.key will be used|C:\Folder\mykeys.api|
-|ValidateKey|No|Switch to validate saved API key. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate||
-|UnmaskKey|No|Switch to show full API key on the screen. If not provided showed key will be masked||
+|Parameter|Required|Description|
+|--|--|--|
+|Name|No|API key name to get details for, e.g. MyKey1. If not provided all all keys will be displayed (equals to `-Name *`)|
+|Path|No|Full path to the encrypted file from where a key will be read. If not provided, a default SentinelOneAPI.key file from AppData folder will be used|
+|ValidateKey|No|Switch to validate saved API key. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate|
+|UnmaskKey|No|Switch to show full API key on the screen. If not provided showed key will be masked|
 #### Examples
 `Get-S1APIKey -Name MyKey1`
 
