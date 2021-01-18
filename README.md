@@ -64,7 +64,9 @@ All filter parameters are optional, if nothing is provided Get-S1Agents gets all
 |NumberOfActiveThreatsEqualTo|Include Agents with this number of active threats|
 |NumberOfActiveThreatsGreaterThan|Include Agents with at least this number of active threats|
 |ScanStatus|Scan status, one from 4 : finished, aborted, started, none|
-|MachineTypes|Comma-separated machine types from a set of 5: kubernetes node, desktop, laptop, server, unknown|
+|MachineTypes|Comma-separated machine types from a set of 5: "kubernetes node", desktop, laptop, server, unknown|
+|NetworkStatuses|Comma-separated agents network statutes from a set of 4: connected, connecting, disconnected, disconnecting
+|UserActionsNeeded|Include agents with pending user actions, press <Tab> to list possible values. Example: reboot_needed, upgrade_needed|
 #### Examples
 `Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
 `Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP` returns all agents from the console where computer name contains "DESKTOP"
