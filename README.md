@@ -42,6 +42,31 @@ You cannot modify existing tokens or add tokens with the same name. If any chang
 ### Invoke-S1FileFetch
 
 ### Get-S1Agents
+Get the agents and their data, that match the filter. This command also returns the Agent ID, which is a required attribute for other cmdlets (e.g. for [`Invoke-S1FileFetch`](#Invoke-S1FileFetch).
+#### Parameters
+|Parameter|Required|Description|
+|--|--|--|
+|APITokenName|Yes|Name of the API token(s) to perform API request|
+|Path|No|A full path to the encrypted file from where a token will be read. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
+|RetryIntervalSec|No|Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received; default is 5|
+|MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
+|ResultSize|No|Number of agents to return, default is 1000, use -ResultSize All to get all agents|
+#### Filter parameters
+|Filter parameter|Example|
+|--|--|
+|ComputerNameContains|Comma-separated hostnames, e.g. DESKTOP, HOST|
+|OSTypes|Comma-separated OS types froma set of 4: windows, linux, macos, windows_legacy, e.g. windows, macos|
+|AgentVersions|Comma-separated agent versions, e.g. 4.4.3.149, 4.2.3.6|
+|IsActive|$true or $false for agent status|
+#### Examples
+`Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP` returns all agents from the console where computer name contains "DESKTOP"
+#### Output
+Array of objects representing agents that match the filter.
+
+
+
+
 
 ### Get-S1APIToken
 Lists and gets details of all currently saved API tokens
