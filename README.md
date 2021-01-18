@@ -55,9 +55,13 @@ Get the agents and their data, that match the filter. This command also returns 
 |Filter parameter|Example|
 |--|--|
 |ComputerNameContains|Comma-separated hostnames, e.g. DESKTOP, HOST|
-|OSTypes|Comma-separated OS types froma set of 4: windows, linux, macos, windows_legacy, e.g. windows, macos|
-|AgentVersions|Comma-separated agent versions, e.g. 4.4.3.149, 4.2.3.6|
-|IsActive|$true or $false for agent status|
+|OSTypes|Comma-separated OS types from a set of 4: windows, linux, macos, windows_legacy, e.g. windows, macos|
+|AgentVersions|Agent versions to include, e.g. 2.0.0.0,2.1.5.144|
+|IsActive|Include only active Agents, $true or $false|
+|IsInfected|Include only agents with at least one active threat, $true of $false|
+|IsUpToDate|Include only agents with updated software, $true of $false|
+|NumberOfActiveThreatsEqualTo|Include Agents with this number of active threats|
+|NumberOfActiveThreatsGreaterThan|Include Agents with at least this number of active threats|
 #### Examples
 `Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
 `Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP` returns all agents from the console where computer name contains "DESKTOP"
