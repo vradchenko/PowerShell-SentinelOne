@@ -9,7 +9,7 @@ SentinelOne module for PowerShell requires PowerShell version > 7.0. Check your 
 
 ### Installation
 Install SentinelOne module from Powershell: `Install-Module -Name SentinelOne`
-Alternatively, download PS1 file and import into PowerShell session `. ./SentinelOne.ps1`
+Alternatively, download 'Invoke-WebRequest https://github.com/' file and import into PowerShell session `. ./SentinelOne.ps1`
 
 ## Supported cmdlets
 - [Add-S1APIToken](#Add-S1APIToken)
@@ -34,7 +34,7 @@ Prerequisites for all other cmdlets to function is to add at least one API token
 #### Examples
 `Add-S1APIToken -APIToken FeA1KIEfKZE3nYog4dafQfcMg7kTqwktKRrRjKUt99U4rkLz1KZrW7dOLFjsLUgOprzT2bsCc41qbRPv -APITokenName MyKey1 -Endpoint https://contoso.sentinelone.net`
 #### Output
-A console message indicatingg whenever a token was added succesfully or not.
+A console message indicating whenever a token was added succesfully or not.
 #### Final notes
 You can add as many tokens as you want (e.g. tokens with different scope or tokens from different consoles).
 You cannot modify existing tokens or add tokens with the same name. If any changes are necessary to the existing tokens you need to delete it with [`Remove-S1APIKey`](#Remove-S1APIToken) first.
