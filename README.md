@@ -62,6 +62,8 @@ Get the agents and their data, that match the filter. This command also returns 
 |IsUpToDate|Include only agents with updated software, $true of $false|
 |NumberOfActiveThreatsEqualTo|Include Agents with this number of active threats|
 |NumberOfActiveThreatsGreaterThan|Include Agents with at least this number of active threats|
+|ScanStatus|Scan status, one from 4 : finished, aborted, started, none|
+|MachineTypes|Comma-separated machine types from a set of 5: kubernetes node, desktop, laptop, server, unknown|
 #### Examples
 `Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
 `Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP` returns all agents from the console where computer name contains "DESKTOP"
