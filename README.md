@@ -61,21 +61,21 @@ All filter parameters are optional, if nothing is provided Get-S1Agents gets all
 |IsActive|Include only active Agents, $true or $false|
 |IsInfected|Include only agents with at least one active threat, $true of $false|
 |IsUpToDate|Include only agents with updated software, $true of $false|
+|IsPendingUninstall|Include agents with pending uninstall requests, $true or $false|
 |NumberOfActiveThreatsEqualTo|Include Agents with this number of active threats|
 |NumberOfActiveThreatsGreaterThan|Include Agents with at least this number of active threats|
 |ScanStatus|Scan status, one from 4 : finished, aborted, started, none|
 |MachineTypes|Comma-separated machine types from a set of 5: "kubernetes node", desktop, laptop, server, unknown|
-|NetworkStatuses|Comma-separated agents network statutes from a set of 4: connected, connecting, disconnected, disconnecting
+|NetworkStatuses|Comma-separated agents network statutes from a set of 4: connected, connecting, disconnected, disconnecting|
 |UserActionsNeeded|Include agents with pending user actions, press <Tab> to list possible values. Example: reboot_needed, upgrade_needed|
+|AgentDomains|Comma-separated agent domain names. Example: contoso.org,lab.dev, workgroup|
 #### Examples
 `Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
 `Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP` returns all agents from the console where computer name contains "DESKTOP"
 #### Output
 Array of objects representing agents that match the filter.
-
-
-
-
+#### Final notes
+There are more agent filters available from the SentinelOne API, however they are not so common so I decided not to implement them. Make an issue if you need other filters!
 
 ### Get-S1APIToken
 Lists and gets details of all currently saved API tokens
