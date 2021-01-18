@@ -76,7 +76,7 @@ All filter parameters are optional, if nothing is provided Get-S1Agents gets all
 
 `Get-S1Agents -APITokenName MyKey1 -ResultSize 500 -ScanStatus finished -IsInfected $true -OSTypes windows, linux`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All -MachineTypes windows -AgentDomains contoso.org`
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All -MachineTypes server -AgentDomains contoso.org`
 
 #### Output
 Array of objects representing agents that match the filter.
