@@ -67,11 +67,14 @@ All filter parameters are optional, if nothing is provided Get-S1Agents gets all
 |ScanStatus|Scan status, one from 4 : finished, aborted, started, none|
 |MachineTypes|Comma-separated machine types from a set of 5: "kubernetes node", desktop, laptop, server, unknown|
 |NetworkStatuses|Comma-separated agents network statutes from a set of 4: connected, connecting, disconnected, disconnecting|
-|UserActionsNeeded|Include agents with pending user actions, press <Tab> to list possible values. Example: reboot_needed, upgrade_needed|
+|UserActionsNeeded|Include agents with pending user actions, press 'Tab' to list possible values. Example: reboot_needed, upgrade_needed|
 |AgentDomains|Comma-separated agent domain names. Example: contoso.org,lab.dev, workgroup|
 #### Examples
 `Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP` returns all agents from the console where computer name contains "DESKTOP"
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP`
+`Get-S1Agents -APITokenName MyKey1 -ResultSize 500 -ScanStatus finished -IsInfected $true -OSTypes windows, linux`
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All -MachineTypes windows -AgentDomains contoso.org`
+
 #### Output
 Array of objects representing agents that match the filter.
 #### Final notes
