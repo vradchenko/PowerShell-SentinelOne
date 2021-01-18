@@ -44,7 +44,7 @@ You cannot modify existing tokens or add tokens with the same name. If any chang
 ### Get-S1Agents
 
 ### Get-S1APIToken
-Lists and gets details of all currently saved API keys
+Lists and gets details of all currently saved API tokens
 #### Parameters
 |Parameter|Required|Description|
 |--|--|--|
@@ -65,3 +65,13 @@ An object showing details of the saved token(s).
 ### Get-S1SitePolicy
 
 ### Remove-S1APIToken
+Removes currently saved API tokens
+#### Parameters
+|Parameter|Required|Description|
+|--|--|--|
+|APITokenName|Yes|API token name to remove, e.g. MyKey1)|
+|Path|No|A full path to the encrypted file from where a token will be removed. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
+#### Examples
+`Remove-S1APIKey -APITokenName MyKey1`
+#### Output
+No output when removed successfully.
