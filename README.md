@@ -52,7 +52,8 @@ Get the agents and their data, that match the filter. This command also returns 
 |MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
 |ResultSize|No|Number of agents to return, default is 1000, use -ResultSize All to get all agents|
 #### Filter parameters
-|Filter parameter|Example|
+All filter parameters are optional, if nothing is provided Get-S1Agents gets all registered agents.
+|Filter parameter|Description|
 |--|--|
 |ComputerNameContains|Comma-separated hostnames, e.g. DESKTOP, HOST|
 |OSTypes|Comma-separated OS types from a set of 4: windows, linux, macos, windows_legacy, e.g. windows, macos|
