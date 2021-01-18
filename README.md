@@ -105,6 +105,34 @@ An object showing details of the saved token(s).
 ### Get-S1DeepVisibility
 
 ### Get-S1SitePolicy
+Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Agents](#Get-S1Agents).
+#### Parameters
+|Parameter|Required|Description|
+|--|--|--|
+|APITokenName|Yes|Name of the API token(s) to perform API request|
+|Path|No|A full path to the encrypted file from where a token will be read. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
+|RetryIntervalSec|No|Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received; default is 5|
+|MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
+|SiteId|Yes|Unique site ID to get settings for| 
+#### Examples
+`Get-S1SitePolicy -APITokenName MyKey1 -SiteId 987654321123456789`
+
+`Get-S1Agents -APITokenName MyKey1 -ResultSize 250 ComputerNameContains DESKTOP | Get-S1SitePolicy` This will get policy settings for all sites where all agents from the first cmdlet are located.
+
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All | Get-S1SitePolicy | Select-Object mitigationMode` This will show mitigationMode settings from all policies applies to all agents.
+#### Output
+Array of objects representing policy settings for a given site ID.
+#### Final notes
+Piping from Get-S1Agents is the easiest way to use this cmdlet, else you need to provide a numerical siteID.
+
+
+
+
+
+
+
+
+
 
 ### Remove-S1APIToken
 Removes currently saved API tokens
