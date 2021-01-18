@@ -71,8 +71,11 @@ All filter parameters are optional, if nothing is provided Get-S1Agents gets all
 |AgentDomains|Comma-separated agent domain names. Example: contoso.org,lab.dev, workgroup|
 #### Examples
 `Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
+
 `Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP`
+
 `Get-S1Agents -APITokenName MyKey1 -ResultSize 500 -ScanStatus finished -IsInfected $true -OSTypes windows, linux`
+
 `Get-S1Agents -APITokenName MyKey1 -ResultSize All -MachineTypes windows -AgentDomains contoso.org`
 
 #### Output
@@ -91,7 +94,9 @@ Lists and gets details of all currently saved API tokens
 |UnmaskAPIToken|No|Switch to show full API key on the screen. If not provided showed key will be masked|
 #### Examples
 `Get-S1APIKey -APITokenName MyKey1 -ValidateAPIToken`
+
 `Get-S1APIKey -APITokenName *`
+
 `Get-S1APIKey -UnmaskAPIToken`
 #### Output
 An object showing details of the saved token(s).
