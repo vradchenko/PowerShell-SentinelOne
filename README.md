@@ -53,6 +53,15 @@ Fetches files from an agent. This cmdlet accepts pipe from [Get-S1Agents](#Get-S
 |Password|No|SentinelOne will encrypt ZIP file with this password. If not provided default password is "Password123"|
 |SaveEmptyFetch|No|If requested file(s) are not available on the agent, SentinelOne returns empty ZIP archive and it will not be saved on a disk. Use this switch to force file saving even when it is empty|
 |DownloadTimeoutSec|No|File fetch requires agent to be online with the console. This parameter speficies for how many seconds to wait for the fetch upload. Default value is 300 (5 min) and it should be enough to fetch a file from an online agent. Cmdlet stops waiting for file fetch upload once this timer expires (however this does not cancel the fetch request and eventually fetch file will be uploaded to the console when agent gets online). Increase this parameter on slow networks or when fetching files from a big number of agents (using pipe from Get-S1Agents)|
+#### Examples
+`Invoke-S1FileFetch -APITokenName MyKey1 -AgentID 987623279592853912 -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml"`
+
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP | Invoke-S1FileFetch -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml" -SaveEmptyFetch`
+
+`Get-S1Agents -APITokenName MyKey1 -ResultSize 10 -OSTypes linux | Invoke-S1FileFetch -File "/etc/passwd"` - Gets /etc/passwd file from up to 10 Linux agents
+
+#### Output
+Console messages showing fetching progress. Once fetching is finished or expired, an object with a fetch summary is returned (filenames, agent names, status). Fetched files are always saved in the current PoweShell script folder.
 
 ### Get-S1Agents
 Get the agents and their data, that match the filter. This command also returns the Agent ID, which is a required attribute for other cmdlets (e.g. for [`Invoke-S1FileFetch`](#Invoke-S1FileFetch).
