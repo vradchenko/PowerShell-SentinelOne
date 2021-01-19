@@ -136,20 +136,9 @@ Submits Deep Visibility query and fetches results
 |ResultSize|No|Number of events to retrieve, default is 1000, maximum is 20000|
 |FetchSize|No|Number of events to retrieve per API call, default is 500, maximum is 1000. Higher number can get results quicker, however timeouts from the API are possible|
 |Earliest|Yes|Specifies date of the earliest event to retrieve. Time can be relative or fixed. Relative modifiers are "d" - days, "h" - hours, "m" - minutes, e.g. "-3d" - 3 days ago, "-12h" - 12 hours ago. Fixed time can be specified in flexible formats like "2021-01-10 13:18:21.500", "1/19/2021 3:59:13.000 PM". Keep in mind this is your local time and it will be converted to UTC before submitting the query. To explicilty specify UTC time you need to add "Z" at the end e.g. "2021-01-10 13:18:21.500 Z".
-|Latest|No|Specifies data of the latest event to retrieve. If not provided then current time is used. Same as with Earliest time, Latest can be relative or fixed, for more details about the format see Earliest description. Latest should be greater or equal to Earliest.
-|Query|Yes*|Specifies full Deep Visibility query, the same way as it looks in the SentinelOne console e.g. -Query 'SrcProcCmdLine RegExp "schtasks" AND SrcProcParentName != "Manages scheduled tasks"'. Always use ' for string determination since " are used in the query itself. Use Query parameter for advanced, manually created and verified queries.
-|EndpointName|Yes*|
-|Sha256|Yes*|
-|Sha1|Yes*|
-|Md5|Yes*|
-|FilePath|Yes*|
-|IP|Yes*|
-|DstPort|Yes*|
-|DNS|Yes*|
-|Name|Yes*|
-|CmdLine|Yes*|
-|UserName|Yes*|
-
+|Latest|No|Specifies data of the latest event to retrieve. If not provided then current time is used. Same as with Earliest time, Latest can be relative or fixed, for more details about the format see Earliest description. Latest should be greater or equal to Earliest.|
+|Query|Yes*|Specifies full Deep Visibility query, the same way as it looks in the SentinelOne console e.g. -Query 'SrcProcCmdLine RegExp "schtasks" AND SrcProcParentName != "Manages scheduled tasks"'. Always use ' for string determination since " are used in the query itself. Use Query parameter for advanced, manually created and verified queries.|
+|EndpointName, Sha256 ,Sha1, Md5, FilePath, IP, DstPort, DNS, Name, CmdLine, UserName|Yes*|These are simplified query parameters. Either Query or at least one simplified parameter must be provided. You cannot combine Query with simplified parameters. All simplified parameters will be combined using "AND", and evaluated as "ContainsCIS", e.g. -CmdLine "svchost" -DstPort 445 will be submitted as CmdLine ContainsCIS "svchost" AND DstPort ContainsCIS "445"|
 
 ### Get-S1SitePolicy
 Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Agents](#Get-S1Agents).
