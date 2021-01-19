@@ -125,7 +125,7 @@ An object showing details of the saved token(s).
 
 
 ### Get-S1DeepVisibility
-Submits Deep Visibility query and fetches results
+Submits Deep Visibility query and fetches results.
 #### Parameters
 |Parameter|Required|Description|
 |--|--|--|
@@ -138,7 +138,21 @@ Submits Deep Visibility query and fetches results
 |Earliest|Yes|Specifies date of the earliest event to retrieve. Time can be relative or fixed. Relative modifiers are "d" - days, "h" - hours, "m" - minutes, e.g. "-3d" - 3 days ago, "-12h" - 12 hours ago. Fixed time can be specified in flexible formats like "2021-01-10 13:18:21.500", "1/19/2021 3:59:13.000 PM". Keep in mind this is your local time and it will be converted to UTC before submitting the query. To explicilty specify UTC time you need to add "Z" at the end e.g. "2021-01-10 13:18:21.500 Z".
 |Latest|No|Specifies data of the latest event to retrieve. If not provided then current time is used. Same as with Earliest time, Latest can be relative or fixed, for more details about the format see Earliest description. Latest should be greater or equal to Earliest.|
 |Query|Yes*|Specifies full Deep Visibility query, the same way as it looks in the SentinelOne console e.g. -Query 'SrcProcCmdLine RegExp "schtasks" AND SrcProcParentName != "Manages scheduled tasks"'. Always use ' for string determination since " are used in the query itself. Use Query parameter for advanced, manually created and verified queries.|
-|EndpointName, Sha256 ,Sha1, Md5, FilePath, IP, DstPort, DNS, Name, CmdLine, UserName|Yes*|These are simplified query parameters. Either Query or at least one simplified parameter must be provided. You cannot combine Query with simplified parameters. All simplified parameters will be combined using "AND", and evaluated as "ContainsCIS", e.g. -CmdLine "svchost" -DstPort 445 will be submitted as CmdLine ContainsCIS "svchost" AND DstPort ContainsCIS "445"|
+|EndpointName, Sha256, Sha1, Md5, FilePath, IP, DstPort, DNS, Name, CmdLine, UserName|Yes*|These are simplified query parameters. Either Query or at least one simplified parameter must be provided. You cannot combine Query with simplified parameters. All simplified parameters will be combined using "AND", and evaluated as "ContainsCIS", e.g. -CmdLine "svchost" -DstPort 445 will be submitted as CmdLine ContainsCIS "svchost" AND DstPort ContainsCIS "445"|
+|ObjectType|Yes*|Additional filter to narrow down event to a certain event type, one from "ip", "dns", "process", "cross_process", "indicators", "file", "registry", "scheduled_task", "url", "command_script", "logins".|
+|EventType|Yes*|Additional filter to narrow down the search even further, by specifying certain evnts like "File Creation", "Registry Value Modified" or "Task Register". Full list is availalbe with auto completion in the script|
+#### Examples
+`Get-S1DeepVisibility -APITokenName MyKey1 -Earliest -24h -Query 'SrcProcCmdLine RegExp "schtasks" AND SrcProcParentName != "Manages scheduled tasks"`
+
+`Get-S1DeepVisibility -APITokenName MyKey1 -Earliest -7d -Latest -6d -EndpointName DESKTOP-RC4DWK -ObjectType dns`
+
+`Get-S1DeepVisibility -APITokenName MyKey1 -Earliest "2021-01-10 13:18:21.500" -Latest -180m -EventType "Task Start"`
+
+`Get-S1DeepVisibility -APITokenName MyKey1 -Earliest -90d IP "192.168.0.1" -DstPort 80 -CmdLine chrome`
+#### Output
+Console messages showing progress of request and an array of objects containing Deep Visibility events.
+#### Final notes
+Overall cmdlet process is: first query is submitted, then script waits for query to finish and then fetches the results. Sometimes submitted queries cannot be completed (Deep Visibility timeout) - in this case script will throw an error when all http retries are used. Fetching the maximum set (20000 events) can take a while, always save cmdlete results to a variable like $events = Get-S1DeepVisibility ... unless you're expecting only a few results (or no results).
 
 ### Get-S1SitePolicy
 Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Agents](#Get-S1Agents).
@@ -149,7 +163,7 @@ Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Age
 |Path|No|A full path to the encrypted file from where a token will be read. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
 |RetryIntervalSec|No|Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received; default is 5|
 |MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
-|SiteId|Yes|Unique site ID to get settings for| 
+|SiteId|Yes|Unique site ID to get policy settings for|
 #### Examples
 `Get-S1SitePolicy -APITokenName MyKey1 -SiteId 987654321123456789`
 
