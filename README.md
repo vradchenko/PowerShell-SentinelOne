@@ -9,7 +9,7 @@ SentinelOne module for PowerShell requires PowerShell version > 7.0. Check your 
 
 ### Installation
 Install SentinelOne module from Powershell: `Install-Module -Name SentinelOne`
-Alternatively, download the script 'Invoke-WebRequest -Uri https://raw.githubusercontent.com/vradchenko/PowerShell-SentinelOne/main/SentinelOne.ps1 -OutFile SentinelOne.ps1' file and import into PowerShell session `. ./SentinelOne.ps1`
+Alternatively, download the script `Invoke-WebRequest -Uri https://raw.githubusercontent.com/vradchenko/PowerShell-SentinelOne/main/SentinelOne.ps1 -OutFile SentinelOne.ps1` file and import into PowerShell session `. ./SentinelOne.ps1`
 
 ## Supported cmdlets
 - [Add-S1APIToken](#Add-S1APIToken)
