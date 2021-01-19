@@ -21,7 +21,7 @@ Alternatively, download the script `Invoke-WebRequest -Uri https://raw.githubuse
 - [Remove-S1APIToken](#Remove-S1APIToken)
 
 ### Add-S1APIToken
-Prerequisites for all other cmdlets to function is to add at least one API token. Key(s) will be stored by default in a user's profile folder (`$env:APPDATA`) in SentinelOneAPI.key file. Before saving API token is encrypted using .NET [System.Security.Cryptography.ProtectedData](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=dotnet-plat-ext-5.0) class using [CurrentUser](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.dataprotectionscope?view=dotnet-plat-ext-5.0)  data protection scope which means that only threads running under the current user context can unprotect the data. API token is never written to a disk in an unprotected format.
+Prerequisites for all other cmdlets to function is to add at least one API token. Token(s) will be stored by default in a user's profile folder (`$env:APPDATA`) in SentinelOneAPI.token file. Before saving API token is encrypted using .NET [System.Security.Cryptography.ProtectedData](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.protecteddata?view=dotnet-plat-ext-5.0) class using [CurrentUser](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.dataprotectionscope?view=dotnet-plat-ext-5.0)  data protection scope which means that only threads running under the current user context can unprotect the data. API token is never written to a disk in an unprotected format.
 #### Parameters
 |Parameter|Required|Description|
 |--|--|--|
@@ -113,13 +113,13 @@ Lists and gets details of all currently saved API tokens
 |APITokenName|No|API token name to get details for, e.g. MyKey1. If not provided all tokens will be displayed (equals to `-APITokenName *`)|
 |Path|No|A full path to the encrypted file from where a token will be read. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
 |ValidateAPIToken|No|Switch to validate saved API key. Validation happens by executing /web/api/v2.1/users/api-token-details. Default is not to validate|
-|UnmaskAPIToken|No|Switch to show full API key on the screen. If not provided showed key will be masked|
+|UnmaskAPIToken|No|Switch to show full API token on the screen. If not provided displayed token(s) will be masked|
 #### Examples
-`Get-S1APIKey -APITokenName MyKey1 -ValidateAPIToken`
+`Get-S1APIToken -APITokenName MyKey1 -ValidateAPIToken`
 
-`Get-S1APIKey -APITokenName *`
+`Get-S1APIToken -APITokenName *`
 
-`Get-S1APIKey -UnmaskAPIToken`
+`Get-S1APIToken -UnmaskAPIToken`
 #### Output
 An object showing details of the saved token(s).
 
@@ -192,6 +192,6 @@ Removes currently saved API tokens
 |APITokenName|Yes|API token name to remove, e.g. MyKey1)|
 |Path|No|A full path to the encrypted file from where a token will be removed. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
 #### Examples
-`Remove-S1APIKey -APITokenName MyKey1`
+`Remove-S1APIToken -APITokenName MyKey1`
 #### Output
 No output when removed successfully.
