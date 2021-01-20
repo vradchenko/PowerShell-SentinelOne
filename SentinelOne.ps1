@@ -906,4 +906,3 @@ function Invoke-S1FileFetch
 	}
 }
 
-#Export-ModuleMember -Function Add-S1APIToken, Get-S1APIToken, Remove-S1APIToken, Get-S1Agents, Get-S1DeepVisibility, Invoke-S1FileFetch, Get-S1SitePolicy
