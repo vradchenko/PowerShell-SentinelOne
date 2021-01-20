@@ -56,7 +56,7 @@ Fetches files from an agent. This cmdlet accepts pipe from [Get-S1Agents](#Get-S
 #### Examples
 `Invoke-S1FileFetch -APITokenName MyKey1 -AgentID 987623279592853912 -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml"`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP | Invoke-S1FileFetch -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml" -SaveEmptyFetch`
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All -ComputerNameContains DESKTOP | Invoke-S1FileFetch -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml" -SaveEmptyFetch`
 
 `Get-S1Agents -APITokenName MyKey1 -ResultSize 10 -OSTypes linux | Invoke-S1FileFetch -File "/etc/passwd"` - Gets /etc/passwd file from up to 10 Linux agents
 
@@ -94,7 +94,7 @@ All filter parameters are optional, if nothing is provided Get-S1Agents gets all
 #### Examples
 `Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All ComputerNameContains DESKTOP`
+`Get-S1Agents -APITokenName MyKey1 -ResultSize All -ComputerNameContains DESKTOP`
 
 `Get-S1Agents -APITokenName MyKey1 -ResultSize 500 -ScanStatus finished -IsInfected $true -OSTypes windows, linux`
 
@@ -167,7 +167,7 @@ Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Age
 #### Examples
 `Get-S1SitePolicy -APITokenName MyKey1 -SiteId 987654321123456789`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize 250 ComputerNameContains DESKTOP | Get-S1SitePolicy` This will get policy settings for all sites where all agents from the first cmdlet are located.
+`Get-S1Agents -APITokenName MyKey1 -ResultSize 250 -ComputerNameContains DESKTOP | Get-S1SitePolicy` This will get policy settings for all sites where all agents from the first cmdlet are located.
 
 `Get-S1Agents -APITokenName MyKey1 -ResultSize All | Get-S1SitePolicy | Select-Object mitigationMode` This will show mitigationMode settings from all policies applies to all agents.
 #### Output
