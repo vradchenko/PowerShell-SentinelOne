@@ -64,7 +64,7 @@ Fetches files from an agent. This cmdlet accepts pipe from [Get-S1Agents](#Get-S
 Console messages showing fetching progress. Once fetching is finished or expired, an object with a fetch summary is returned (filenames, agent names, status). Fetched files are always saved in the current PoweShell script folder.
 
 ### Get-S1Agents
-Get the agents and their data, that match the filter. This command also returns the Agent ID, which is a required attribute for other cmdlets (e.g. for [`Invoke-S1FileFetch`](#Invoke-S1FileFetch).
+Get the agents and their data, that match the filter. This command also returns the Agent ID, which is a required attribute for other cmdlets (e.g. for [`Invoke-S1FileFetch`](#Invoke-S1FileFetch)).
 #### Parameters
 |Parameter|Required|Description|
 |--|--|--|
