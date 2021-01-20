@@ -187,7 +187,6 @@ class SentinelOne
 				Default {}
 			}
 		}
-		write-host $filter
 		return $filter
 	}
 	
