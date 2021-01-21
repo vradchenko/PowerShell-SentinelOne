@@ -184,6 +184,7 @@ class SentinelOne
 				"NetworkStatuses" { $filter += "&networkStatuses="+$($Parameters[$Key] -join ","); Break }
 				"AgentDomains" { $filter += "&domains="+$($Parameters[$Key] -join ","); Break }
 				"IsPendingUninstall" { $filter += "&isPendingUninstall="+$($Parameters[$Key]); Break }
+				"IsDecommissioned" { $filter += "&isDecommissioned="+$($Parameters[$Key]); Break }
 				Default {}
 			}
 		}
@@ -539,8 +540,11 @@ function Get-S1Agents
 
 		[Parameter()]
 		[ValidateNotNullOrEmpty()]
-		[Bool] $IsPendingUninstall
-
+		[Bool] $IsPendingUninstall,
+		
+		[Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[Bool] $IsDecommissioned
 	)
 	
 	$API = [SentinelOne]::new($Path)
