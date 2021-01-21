@@ -121,8 +121,7 @@ Lists and gets details of all currently saved API tokens
 
 `Get-S1APIToken -UnmaskAPIToken`
 #### Output
-An object showing details of the saved token(s).
-
+An object showing details of the saved token(s). If ValidateAPIToken is set, a token expiration date is shown.
 
 ### Get-S1DeepVisibility
 Submits Deep Visibility query and fetches results.
