@@ -72,6 +72,7 @@ class SentinelOne
 				return $false
 			}
 		}
+		$this.APITokens.$APITokenName.ExpiresAt = $http.data.expiresAt
 		return $true
 	}
 
@@ -428,6 +429,7 @@ function Get-S1APIToken
 		if ($ValidateAPIToken)
 		{
 			$APITokenHashTable.IsValid = $API.ValidateAPIToken($Name, $false)
+			$APITokenHashTable.ExpiresAt = $API.APITokens.$Name.ExpiresAt
 		}
 		$Tokens += [PSCustomObject]$APITokenHashTable
 	}
