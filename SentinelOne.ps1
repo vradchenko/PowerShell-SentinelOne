@@ -824,7 +824,7 @@ function Invoke-S1FileFetch
 	}
 	Process
 	{
-		Write-Host "Requesting fetch from agent $AgentID in $APITokenName." -NoNewline
+		Write-Host "Requesting fetch from agent $AgentID in $APITokenName. " -NoNewline
 		$API.CheckAPITokenName($APITokenName)
 		$FetchTime = (Get-Date).ToUniversalTime()
 		$FetchResult = $API.RequestFileFetch($APITokenName, $AgentID, $File, $Password)
