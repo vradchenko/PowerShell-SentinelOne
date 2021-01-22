@@ -305,7 +305,7 @@ class SentinelOne
 	{
 		[System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression")
 		$URI = $this.APITokens[$APITokenName].Endpoint + "web/api/v2.1" + $DownloadUrl
-		$OutFile = $PSScriptRoot + "\" + $Filename + ".zip"
+		$OutFile = $(Get-Location).Path + "\" + $Filename + ".zip"
 		$ZipFileFetch = Invoke-WebRequest -Uri $URI -Method GET -Headers @{Authorization = "APIToken "+$this.APITokens[$APITokenName].APIToken} -RetryIntervalSec $this.RetryIntervalSec -MaximumRetryCount $this.MaximumRetryCount
 		$ZipStream = New-Object System.IO.Memorystream
 		$ZipStream.Write($ZipFileFetch.Content,0,$ZipFileFetch.Content.Length)
@@ -824,7 +824,7 @@ function Invoke-S1FileFetch
 	}
 	Process
 	{
-		Write-Host "Requesting fetch from agent $AgentID in $APITokenName." -NoNewline
+		Write-Host "Requesting fetch from agent $AgentID in $APITokenName. " -NoNewline
 		$API.CheckAPITokenName($APITokenName)
 		$FetchTime = (Get-Date).ToUniversalTime()
 		$FetchResult = $API.RequestFileFetch($APITokenName, $AgentID, $File, $Password)
