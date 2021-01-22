@@ -843,8 +843,7 @@ function Invoke-S1FileFetch
 	{
 		if ($FetchCollection.Count -eq 0)
 		{
-			Write-Host "No agents to fetch from (pipe input is empty)" -ForegroundColor Red
-			exit
+			throw "No agents to fetch from (pipe input is empty)"
 		}
 		Start-Sleep 3
 		#Getting submission activity page per APITokenName
