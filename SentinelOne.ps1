@@ -824,7 +824,7 @@ function Invoke-S1FileFetch
 	}
 	Process
 	{
-		Write-Host "Requesting fetch from agent $AgentID in $APITokenName. " -NoNewline
+		Write-Host "Requesting fetch from agent $AgentID using API token $APITokenName. " -NoNewline
 		$API.CheckAPITokenName($APITokenName)
 		$FetchTime = (Get-Date).ToUniversalTime()
 		$FetchResult = $API.RequestFileFetch($APITokenName, $AgentID, $File, $Password)
@@ -841,6 +841,11 @@ function Invoke-S1FileFetch
 	}
 	End
 	{
+		if ($FetchCollection.Count -eq 0)
+		{
+			Write-Host "No agents to fetch from (pipe input is empty)" -ForegroundColor Red
+			exit
+		}
 		Start-Sleep 3
 		#Getting submission activity page per APITokenName
 		Write-Host "Getting activity fetch logs..."
