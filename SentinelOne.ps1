@@ -20,7 +20,6 @@ class SentinelOne
 		FetchFiles = @{Method = "POST"; URI = "web/api/v2.1/agents/{agent_id}/actions/fetch-files"};
 		SitePolicy = @{Method = "GET"; URI = "web/api/v2.1/sites/{site_id}/policy"}}
 
-
 	SentinelOne($Path)
 	{
 		$this.Path = $Path
@@ -294,7 +293,7 @@ class SentinelOne
 		return $false
 	}
 
-	[PSObject] RequestFileFetchActivityPage($APITokenName, $Code)
+	[PSCustomObject] RequestFileFetchActivityPage($APITokenName, $Code)
 	{
 		$Http = $this.MakeHTTPRequest($APITokenName, "GetActivities", @($Code))
 		$Http.data | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
@@ -324,7 +323,7 @@ class SentinelOne
 
 	}
 
-	[PSObject] GetS1SitePolicy($APITokenName, $SiteId, $SiteName)
+	[PSCustomObject] GetS1SitePolicy($APITokenName, $SiteId, $SiteName)
 	{
 		$Http = $this.MakeHTTPRequest($APITokenName, "SitePolicy", @($SiteId))
 		$Http.data | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
@@ -357,22 +356,20 @@ class SentinelOne
 		return $Return
 	}
 }
+
 function Add-S1APIToken
 {
 	[CmdletBinding()]
 	Param(
 
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name")]
-		[ValidateNotNullOrEmpty()]
 		[String] $APITokenName,
 
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token")]
 		[ValidateLength(80,80)]
-		[ValidateNotNullOrEmpty()]
 		[String] $APIToken,
 			
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token endpoint URL (e.g. https://contoso.sentinelone.net/)")]
-		[ValidateNotNullOrEmpty()]
 		[String] $Endpoint,
 
 		[Parameter(HelpMessage="You can provide and save comments to the API token")]
@@ -396,9 +393,6 @@ function Add-S1APIToken
 		Write-Host "Failed to add API token `"$APITokenName`"." -ForegroundColor Red
 	}
 }
-
-
-
 
 function Get-S1APIToken
 {
@@ -449,7 +443,6 @@ function Remove-S1APIToken
 	[CmdletBinding()]
 	Param(
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name")]
-		[ValidateNotNullOrEmpty()]
 		[String] $APITokenName,
 
 		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
@@ -466,7 +459,6 @@ function Get-S1Agents
 	[CmdletBinding(PositionalBinding = $false)]
 	Param(
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name")]
-		[ValidateNotNullOrEmpty()]
 		[String[]] $APITokenName,
 
 		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
@@ -565,7 +557,6 @@ function Get-S1DeepVisibility
 	[CmdletBinding()]
 	Param(
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name")]
-		[ValidateNotNullOrEmpty()]
 		[String[]] $APITokenName,
 
 		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
@@ -617,8 +608,8 @@ function Get-S1DeepVisibility
 				$types.Values | ForEach-Object {$_}
 			})]
 		[String] $EventType,
+		
 		[Parameter(Mandatory, HelpMessage="Enter Deep Visibility search range")]
-		[ValidateNotNullOrEmpty()]
 		[String] $Earliest,
 		
 		[Parameter(HelpMessage="Enter Deep Visibility search range")]
@@ -637,7 +628,6 @@ function Get-S1DeepVisibility
 	{
 		$toDate = $API.parseRange($Latest)
 		$toDate = $(Get-Date -Date $($(Get-Date -Date $toDate).ToUniversalTime()) -Format O)
-
 		if ($fromDate -gt $toDate)
 		{
 			throw "Latest is before Earliest!"
@@ -730,7 +720,6 @@ function Get-S1SitePolicy
 	[CmdletBinding()]
 	Param(
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name", ValueFromPipelineByPropertyName)]
-		[ValidateNotNullOrEmpty()]
 		[String] $APITokenName,
 
 		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
@@ -746,7 +735,6 @@ function Get-S1SitePolicy
 		[Int] $MaximumRetryCount = 2,
 
 		[Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-		[ValidateNotNullOrEmpty()]
 		[String] $SiteId,
 
 		[Parameter(ValueFromPipelineByPropertyName, DontShow)]
@@ -782,7 +770,6 @@ function Invoke-S1FileFetch
 	[CmdletBinding()]
 	Param(
 		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name", ValueFromPipelineByPropertyName)]
-		[ValidateNotNullOrEmpty()]
 		[String] $APITokenName,
 
 		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
@@ -803,14 +790,12 @@ function Invoke-S1FileFetch
 
 		[Parameter(Mandatory, ValueFromPipelineByPropertyName)]
 		[Alias("id")]
-		[ValidateNotNullOrEmpty()]
 		[String] $AgentID,
 
 		[ValidateNotNullOrEmpty()]
 		[String] $Password = "Password123",
 
 		[Parameter(Mandatory)]
-		[ValidateNotNullOrEmpty()]
 		[String[]] $File,
 
 		[Switch] $SaveEmptyFetch
