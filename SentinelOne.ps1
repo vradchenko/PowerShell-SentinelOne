@@ -58,7 +58,7 @@ class SentinelOne
 		$Body = ConvertTo-Json -Compress -InputObject $(@{data = @{apiToken = $this.APITokens.$APITokenName.APIToken}})
 		try
 		{
-			$http = $this.MakeHTTPRequest($APITokenName, "ApiTokenDetails", @($Body))
+			$this.MakeHTTPRequest($APITokenName, "ApiTokenDetails", @($Body)) | Out-Null
 		}
 		catch
 		{
@@ -191,7 +191,7 @@ class SentinelOne
 		return $filter
 	}
 	
-	[PSCustomObject] GetAgents($APITokenName, $ResultSize, $Parameters)
+	[PSObject] GetAgents($APITokenName, $ResultSize, $Parameters)
 	{
 		$Return = @()
 		$GetAll = $false
@@ -293,7 +293,7 @@ class SentinelOne
 		return $false
 	}
 
-	[PSCustomObject] RequestFileFetchActivityPage($APITokenName, $Code)
+	[PSObject] RequestFileFetchActivityPage($APITokenName, $Code)
 	{
 		$Http = $this.MakeHTTPRequest($APITokenName, "GetActivities", @($Code))
 		$Http.data | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
@@ -323,7 +323,7 @@ class SentinelOne
 
 	}
 
-	[PSCustomObject] GetS1SitePolicy($APITokenName, $SiteId, $SiteName)
+	[PSObject] GetS1SitePolicy($APITokenName, $SiteId, $SiteName)
 	{
 		$Http = $this.MakeHTTPRequest($APITokenName, "SitePolicy", @($SiteId))
 		$Http.data | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
@@ -332,7 +332,7 @@ class SentinelOne
 		return $Http.data
 	}
 
-	[PSCustomObject] GetQueryData($APITokenName, $QueryID, $FetchSize)
+	[PSObject] GetQueryData($APITokenName, $QueryID, $FetchSize)
 	{
 		$Return = @()
 		$NextCursor = ""
@@ -661,7 +661,7 @@ function Get-S1DeepVisibility
 			"UserName" {$QueryToRun += " AND UserName ContainsCIS `""+$UserName+"`""; Break }
 			"EndpointName" {$QueryToRun += " AND EndpointName ContainsCIS `""+$EndpointName+"`""; Break }
 			"ObjectType"  {$QueryToRun += " AND ObjectType = `""+$ObjectType+"`""; Break } 
-			"ObjectType"  {$QueryToRun += " AND EventType = `""+$EventType+"`""; Break } 
+			"EventType"  {$QueryToRun += " AND EventType = `""+$EventType+"`""; Break } 
 			"DstPort"  {$QueryToRun += " AND DstPort = `""+$DstPort+"`""; Break } 
 			Default {}
 		}
