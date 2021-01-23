@@ -14,7 +14,7 @@ Alternatively, download the script `Invoke-WebRequest -Uri https://raw.githubuse
 ## Supported cmdlets
 - [Add-S1APIToken](#Add-S1APIToken)
 - [Invoke-S1FileFetch](#Invoke-S1FileFetch)
-- [Get-S1Agents](#Get-S1Agents)
+- [Get-S1Agent](#Get-S1Agent)
 - [Get-S1APIToken](#Get-S1APIToken)
 - [Get-S1DeepVisibility](#Get-S1DeepVisibility)
 - [Get-S1SitePolicy](#Get-S1SitePolicy)
@@ -40,7 +40,7 @@ You can add as many tokens as you want (e.g. tokens with different scope or toke
 You cannot modify existing tokens or add tokens with the same name. If any changes are necessary to the existing tokens you need to delete it with [`Remove-S1APIKey`](#Remove-S1APIToken) first.
 
 ### Invoke-S1FileFetch
-Fetches files from an agent. This cmdlet accepts pipe from [Get-S1Agents](#Get-S1Agents) and will fetch same file(S) from all agents returned by Get-S1Agents.
+Fetches files from an agent. This cmdlet accepts pipe from [Get-S1Agent](#Get-S1Agent) and will fetch same file(S) from all agents returned by Get-S1Agent.
 #### Parameters
 |Parameter|Required|Description|
 |--|--|--|
@@ -52,18 +52,18 @@ Fetches files from an agent. This cmdlet accepts pipe from [Get-S1Agents](#Get-S
 |File|Yes|Comma-separated files to fetch from the agent. Example: "C:\Windows\notepad.exe", "C:\Users\Public\Documents\flag.txt"|
 |Password|No|SentinelOne will encrypt ZIP file with this password. If not provided default password is "Password123"|
 |SaveEmptyFetch|No|If requested file(s) are not available on the agent, SentinelOne returns empty ZIP archive and it will not be saved on a disk. Use this switch to force file saving even when it is empty|
-|DownloadTimeoutSec|No|File fetch requires agent to be online with the console. This parameter speficies for how many seconds to wait for the fetch upload. Default value is 300 (5 min) and it should be enough to fetch a file from an online agent. Cmdlet stops waiting for file fetch upload once this timer expires (however this does not cancel the fetch request and eventually fetch file will be uploaded to the console when agent gets online). Increase this parameter on slow networks or when fetching files from a big number of agents (using pipe from Get-S1Agents)|
+|DownloadTimeoutSec|No|File fetch requires agent to be online with the console. This parameter speficies for how many seconds to wait for the fetch upload. Default value is 300 (5 min) and it should be enough to fetch a file from an online agent. Cmdlet stops waiting for file fetch upload once this timer expires (however this does not cancel the fetch request and eventually fetch file will be uploaded to the console when agent gets online). Increase this parameter on slow networks or when fetching files from a big number of agents (using pipe from Get-S1Agent)|
 #### Examples
 `Invoke-S1FileFetch -APITokenName MyKey1 -AgentID 987623279592853912 -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml"`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All -ComputerNameContains DESKTOP | Invoke-S1FileFetch -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml" -SaveEmptyFetch`
+`Get-S1Agent -APITokenName MyKey1 -ResultSize All -ComputerNameContains DESKTOP | Invoke-S1FileFetch -File "C:\windows\UpdateLog.txt", "C:\Program Files\Microsoft\config.xml" -SaveEmptyFetch`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize 10 -OSTypes linux | Invoke-S1FileFetch -File "/etc/passwd"` - Gets /etc/passwd file from up to 10 Linux agents
+`Get-S1Agent -APITokenName MyKey1 -ResultSize 10 -OSTypes linux | Invoke-S1FileFetch -File "/etc/passwd"` - Gets /etc/passwd file from up to 10 Linux agents
 
 #### Output
 Console messages showing fetching progress. Once fetching is finished or expired, an object with a fetch summary is returned (filenames, agent names, status). Fetched files are always saved in the current PoweShell script folder.
 
-### Get-S1Agents
+### Get-S1Agent
 Get the agents and their data, that match the filter. This command also returns the Agent ID, which is a required attribute for other cmdlets (e.g. for [`Invoke-S1FileFetch`](#Invoke-S1FileFetch)).
 #### Parameters
 |Parameter|Required|Description|
@@ -74,7 +74,7 @@ Get the agents and their data, that match the filter. This command also returns 
 |MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
 |ResultSize|No|Number of agents to return, default is 1000, use -ResultSize All to get all agents|
 #### Filter parameters
-All filter parameters are optional, if nothing is provided Get-S1Agents gets all registered agents.
+All filter parameters are optional, if nothing is provided Get-S1Agent gets all registered agents.
 |Filter parameter|Description|
 |--|--|
 |ComputerNameContains|Comma-separated hostnames, e.g. DESKTOP, HOST|
@@ -92,13 +92,13 @@ All filter parameters are optional, if nothing is provided Get-S1Agents gets all
 |UserActionsNeeded|Include agents with pending user actions, press 'Tab' to list possible values. Example: reboot_needed, upgrade_needed|
 |AgentDomains|Comma-separated agent domain names. Example: contoso.org,lab.dev, workgroup|
 #### Examples
-`Get-S1Agents -APITokenName MyKey1` returns first 1000 agents from the console
+`Get-S1Agent -APITokenName MyKey1` returns first 1000 agents from the console
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All -ComputerNameContains DESKTOP`
+`Get-S1Agent -APITokenName MyKey1 -ResultSize All -ComputerNameContains DESKTOP`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize 500 -ScanStatus finished -IsInfected $true -OSTypes windows, linux`
+`Get-S1Agent -APITokenName MyKey1 -ResultSize 500 -ScanStatus finished -IsInfected $true -OSTypes windows, linux`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All -MachineTypes server -AgentDomains contoso.org`
+`Get-S1Agent -APITokenName MyKey1 -ResultSize All -MachineTypes server -AgentDomains contoso.org`
 
 #### Output
 Array of objects representing agents that match the filter.
@@ -154,7 +154,7 @@ Console messages showing progress of request and an array of objects containing 
 Overall cmdlet process is: first query is submitted, then script waits for query to finish and then fetches the results. Sometimes submitted queries cannot be completed (Deep Visibility timeout) - in this case script will throw an error when all http retries are used. Fetching the maximum set (20000 events) can take a while, always save cmdlete results to a variable like $events = Get-S1DeepVisibility ... unless you're expecting only a few results (or no results).
 
 ### Get-S1SitePolicy
-Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Agents](#Get-S1Agents).
+Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Agent](#Get-S1Agent).
 #### Parameters
 |Parameter|Required|Description|
 |--|--|--|
@@ -166,13 +166,13 @@ Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Age
 #### Examples
 `Get-S1SitePolicy -APITokenName MyKey1 -SiteId 987654321123456789`
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize 250 -ComputerNameContains DESKTOP | Get-S1SitePolicy` This will get policy settings for all sites where all agents from the first cmdlet are located.
+`Get-S1Agent -APITokenName MyKey1 -ResultSize 250 -ComputerNameContains DESKTOP | Get-S1SitePolicy` This will get policy settings for all sites where all agents from the first cmdlet are located.
 
-`Get-S1Agents -APITokenName MyKey1 -ResultSize All | Get-S1SitePolicy | Select-Object mitigationMode` This will show mitigationMode settings from all policies applies to all agents.
+`Get-S1Agent -APITokenName MyKey1 -ResultSize All | Get-S1SitePolicy | Select-Object mitigationMode` This will show mitigationMode settings from all policies applies to all agents.
 #### Output
 Array of objects representing policy settings for a given site ID.
 #### Final notes
-Piping from Get-S1Agents is the easiest way to use this cmdlet, else you need to provide a numerical siteID.
+Piping from Get-S1Agent is the easiest way to use this cmdlet, else you need to provide a numerical siteID.
 
 
 

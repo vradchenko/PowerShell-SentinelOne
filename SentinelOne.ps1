@@ -58,7 +58,7 @@ class SentinelOne
 		$Body = ConvertTo-Json -Compress -InputObject $(@{data = @{apiToken = $this.APITokens.$APITokenName.APIToken}})
 		try
 		{
-			$this.MakeHTTPRequest($APITokenName, "ApiTokenDetails", @($Body)) | Out-Null
+			$Http = $this.MakeHTTPRequest($APITokenName, "ApiTokenDetails", @($Body))
 		}
 		catch
 		{
@@ -71,7 +71,7 @@ class SentinelOne
 				return $false
 			}
 		}
-		$this.APITokens.$APITokenName.ExpiresAt = $http.data.expiresAt
+		$this.APITokens.$APITokenName.ExpiresAt = $Http.data.expiresAt
 		return $true
 	}
 
@@ -454,7 +454,7 @@ function Remove-S1APIToken
 	$API.RemoveAPIToken($APITokenName)
 }
 
-function Get-S1Agents
+function Get-S1Agent
 {
 	[CmdletBinding(PositionalBinding = $false)]
 	Param(
@@ -593,20 +593,11 @@ function Get-S1DeepVisibility
 		[Parameter(ParameterSetName="Simple")][ValidateNotNullOrEmpty()][String] $UserName,
 		[Parameter(ParameterSetName="Simple")][ValidateNotNullOrEmpty()][String] $DstPort,
 		[Parameter(ParameterSetName="Simple")][ValidateNotNullOrEmpty()]
-		[ArgumentCompleter(
-			{
-				param ($a,$b,$c,$d,$e)
-				$types = @{Types = @("ip", "dns", "process", "cross_process", "indicators", "file", "registry", "scheduled_task", "url", "command_script", "logins")};
-				$types.Values | ForEach-Object {$_}
-			})]
+		[ValidateSet("ip", "dns", "process", "cross_process", "indicators", "file", "registry", "scheduled_task", "url", "command_script", "logins")]
 		[String] $ObjectType,
+		
 		[Parameter(ParameterSetName="Simple")][ValidateNotNullOrEmpty()]
-		[ArgumentCompleter(
-			{
-				param ($a,$b,$c,$d,$e)
-				$types = @{Types = @("Login", "`"Registry Key Export`"", "Logout", "Unknown", "`"Pre Execution Detection`"", "Command Script", "HEAD", "DELETE", "Registry Key Security Changed", "File Scan", "PUT", "Remote Thread Creation", "OPTIONS", "DNS Unresolved", "Task Register", "Task Delete", "Task Update", "Duplicate Thread Handle", "IP Listen", "Task Start", "CONNECT", "GET", "Registry Value Create", "DNS Resolved", "Registry Key Create", "Process Creation", "Open Remote Process Handle", "Behavioral Indicators", "Duplicate Process Handle", "Task Trigger", "POST", "File Deletion", "Registry Value Modified", "Registry Value Delete", "Registry Key Delete", "Not Reported", "IP Connect", "File Modification", "File Creation", "File Rename")};
-				$types.Values | ForEach-Object {$_}
-			})]
+		[ValidateSet("Login", "`"Registry Key Export`"", "Logout", "Unknown", "`"Pre Execution Detection`"", "Command Script", "HEAD", "DELETE", "Registry Key Security Changed", "File Scan", "PUT", "Remote Thread Creation", "OPTIONS", "DNS Unresolved", "Task Register", "Task Delete", "Task Update", "Duplicate Thread Handle", "IP Listen", "Task Start", "CONNECT", "GET", "Registry Value Create", "DNS Resolved", "Registry Key Create", "Process Creation", "Open Remote Process Handle", "Behavioral Indicators", "Duplicate Process Handle", "Task Trigger", "POST", "File Deletion", "Registry Value Modified", "Registry Value Delete", "Registry Key Delete", "Not Reported", "IP Connect", "File Modification", "File Creation", "File Rename")]
 		[String] $EventType,
 		
 		[Parameter(Mandatory, HelpMessage="Enter Deep Visibility search range")]
