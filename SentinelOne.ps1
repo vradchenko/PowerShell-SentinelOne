@@ -302,25 +302,36 @@ class SentinelOne
 
 	[Bool] RequestFileFetchDownload($APITokenName, $DownloadUrl, $Filename, $SaveEmptyFetch)
 	{
-		[System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression")
 		$URI = $this.APITokens[$APITokenName].Endpoint + "web/api/v2.1" + $DownloadUrl
 		$OutFile = $(Get-Location).Path + "\" + $Filename + ".zip"
 		$ZipFileFetch = Invoke-WebRequest -Uri $URI -Method GET -Headers @{Authorization = "APIToken "+$this.APITokens[$APITokenName].APIToken} -RetryIntervalSec $this.RetryIntervalSec -MaximumRetryCount $this.MaximumRetryCount
-		$ZipStream = New-Object System.IO.Memorystream
-		$ZipStream.Write($ZipFileFetch.Content,0,$ZipFileFetch.Content.Length)
-		$ZipFile = [System.IO.Compression.ZipArchive]::new($ZipStream)
-		if ($SaveEmptyFetch -or $ZipFile.Entries.Count -gt 1)
+		if ($ZipFileFetch.RawContentLength -gt 5000 -or $SaveEmptyFetch)
 		{
-			$ZipFileFetch.Content | Set-Content -Path $OutFile -AsByteStream
+			#ZIP file is not empty because of its size - no need to unpack in memory. Just saving.
+			#SaveEmptyFetch was set. Just saving.
+			[System.IO.File]::WriteAllBytes($OutFile, $ZipFileFetch.Content)
 			Write-Host "File saved to $OutFile" -ForegroundColor Green
 			return $true
 		}
 		else
 		{
-			Write-Host "$Filename.zip was fetched, but appear to be empty. Not saving." -ForegroundColor Red
-			return $false
+			[System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression")
+			$ZipStream = New-Object System.IO.Memorystream
+			$ZipStream.Write($ZipFileFetch.Content,0,$ZipFileFetch.Content.Length)
+			$ZipFile = [System.IO.Compression.ZipArchive]::new($ZipStream)
+			if ($ZipFile.Entries.Count -gt 1)
+			{
+				[System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression")
+				$ZipFileFetch.Content | Set-Content -Path $OutFile -AsByteStream
+				Write-Host "File saved to $OutFile" -ForegroundColor Green
+				return $true
+			}
+			else
+			{
+				Write-Host "$Filename.zip was fetched, but appear to be empty. Not saving." -ForegroundColor Red
+				return $false
+			}
 		}
-
 	}
 
 	[PSObject] GetS1SitePolicy($APITokenName, $SiteId, $SiteName)
