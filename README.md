@@ -17,7 +17,10 @@ Alternatively, download the script `Invoke-WebRequest -Uri https://raw.githubuse
 - [Get-S1Agent](#Get-S1Agent)
 - [Get-S1APIToken](#Get-S1APIToken)
 - [Get-S1DeepVisibility](#Get-S1DeepVisibility)
+- [Get-S1Site](#Get-S1Site)
 - [Get-S1SitePolicy](#Get-S1SitePolicy)
+- [Get-S1Group](#Get-S1Group)
+- [Get-S1Exclusion](#Get-S1Exclusion)
 - [Remove-S1APIToken](#Remove-S1APIToken)
 
 ### Add-S1APIToken
@@ -153,6 +156,24 @@ Console messages showing progress of request and an array of objects containing 
 #### Final notes
 Overall cmdlet process is: first query is submitted, then script waits for query to finish and then fetches the results. Sometimes submitted queries cannot be completed (Deep Visibility timeout) - in this case script will throw an error when all http retries are used. Fetching the maximum set (20000 events) can take a while, always save cmdlete results to a variable like $events = Get-S1DeepVisibility ... unless you're expecting only a few results (or no results).
 
+### Get-S1Site
+Get all sites.
+#### Parameters
+|Parameter|Required|Description|
+|--|--|--|
+|APITokenName|Yes|Name of the API token(s) to perform API request|
+|Path|No|A full path to the encrypted file from where a token will be read. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
+|RetryIntervalSec|No|Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received; default is 5|
+|MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
+|SiteId|No|Numerical site ID, if not provided then all sites are returned|
+|IncludeDeletedSites|No|Switch to get deleted sites as well|
+#### Examples
+`Get-S1Site -APITokenName MyKey1 -SiteId 987654321123456789`
+
+`Get-S1Site -APITokenName MyKey1`
+#### Output
+Array of objects representing site setting for a given site ID, or for all sites.
+
 ### Get-S1SitePolicy
 Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Agent](#Get-S1Agent).
 #### Parameters
@@ -172,15 +193,46 @@ Get site policy settings from a siteID. This cmdlet accepts pipe from [Get-S1Age
 #### Output
 Array of objects representing policy settings for a given site ID.
 #### Final notes
-Piping from Get-S1Agent is the easiest way to use this cmdlet, else you need to provide a numerical siteID.
+Piping from Get-S1Agent or Get-S1Site is the easiest way to use this cmdlet, else you need to provide a numerical siteID.
 
+### Get-S1Group
+Get all groups from a given site.
+#### Parameters
+|Parameter|Required|Description|
+|--|--|--|
+|APITokenName|Yes|Name of the API token(s) to perform API request|
+|Path|No|A full path to the encrypted file from where a token will be read. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
+|RetryIntervalSec|No|Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received; default is 5|
+|MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
+|SiteId|Yes|Numerical site ID to get groups from|
+#### Examples
+`Get-S1Group -APITokenName MyKey1 -SiteId 987654321123456789`
 
+`Get-S1Site -APITokenName MyKey1 | Get-S1Group`
 
+`Get-S1Agent -APITokenName MyKey1 -ComputerNameContains XYZ -ResultSize 100 | Get-S1Group`
+#### Output
+Array of objects representing group settings.
+#### Final notes
+Piping from Get-S1Agent or Get-S1Site is the easiest way to use this cmdlet, else you need to provide a numerical siteID.
 
+### Get-S1Exclusion
+Get all exclusions of given type from all scopes (Gloval, Account, Site, Group).
+#### Parameters
+|Parameter|Required|Description|
+|--|--|--|
+|APITokenName|Yes|Name of the API token(s) to perform API request|
+|Path|No|A full path to the encrypted file from where a token will be read. If not provided, a default AppData folder and SentinelOneAPI.token filename will be used|
+|RetryIntervalSec|No|Specifies the interval between retries for the connection when a failure code between 400 and 599, inclusive or 304 is received; default is 5|
+|MaximumRetryCount|No|Specifies how many times PowerShell retries a connection when a failure code between 400 and 599, inclusive or 304 is received; default is 2|
+|IncludeDeletedSites|No|Switch to get exclusions from deleted sites as well|
+|Type|Yes|Type of the exclusion, one of: path, white_hash, browser, certificate, file_type|
+#### Examples
+`Get-S1Exclusion -APITokenName MyKey1 -Type path`
 
-
-
-
+`Get-S1Exclusion -APITokenName MyKey1 -Type white_hash -IncludeDeletedSites | Select-Object exceptionScope, value, createdAt`
+#### Output
+Array of objects representing all exclusions from all scopes. ExceptionScope field identifies scope of the exception. AccountName, siteName and groupName field shows exception exact location.
 
 
 ### Remove-S1APIToken

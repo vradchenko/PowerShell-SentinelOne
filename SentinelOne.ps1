@@ -18,6 +18,9 @@ class SentinelOne
 		GetEvents = @{Method = "GET"; URI = "web/api/v2.1/dv/events?sortBy=createdAt&queryId="};
 		GetActivities = @{Method = "GET"; URI = "web/api/v2.1/activities?sortBy=createdAt&sortOrder=desc&limit=1000&activityTypes="};
 		FetchFiles = @{Method = "POST"; URI = "web/api/v2.1/agents/{agent_id}/actions/fetch-files"};
+		GetSites = @{Method = "GET"; URI = "/web/api/v2.1/sites?limit=1000"};
+		GetGroups = @{Method = "GET"; URI = "/web/api/v2.1/groups?limit=200&siteIds="};
+		GetExclusions = @{Method = "GET"; URI = "/web/api/v2.1/exclusions?limit=1000&type="};
 		SitePolicy = @{Method = "GET"; URI = "web/api/v2.1/sites/{site_id}/policy"}}
 
 	SentinelOne($Path)
@@ -38,41 +41,76 @@ class SentinelOne
 				"GetEvents" { $URI += $Parameters[0] + "&cursor=" + $Parameters[1] + "&limit=" + $Parameters[2]; break}
 				"FetchFiles" { $URI = $URI.Replace("{agent_id}", $Parameters[1]); break}
 				"GetActivities" { $URI += $Parameters[0]; break}
+				"GetGroups" { $URI += $Parameters[0]; break}
 				"SitePolicy" { $URI = $URI.Replace("{site_id}", $Parameters[0]); break}
+				"GetExclusions" { $URI += $Parameters[1]; $URI += "&cursor=$($Parameters[4])"; ;if ($Parameters[0] -ne "Global") {$URI += "&siteIds=$($Parameters[2])"}; if ($Parameters[0] -eq "Group") {$URI += "&groupIds=$($Parameters[3])"}; break}
 				Default {}
 			}
 
 		if ($this.APIEndpoints.$RequestName.Method -eq "GET")
 		{
-			return Invoke-RestMethod -Uri $URI -Method GET -Headers $Headers -RetryIntervalSec $this.RetryIntervalSec -MaximumRetryCount $this.MaximumRetryCount -ContentType "application/json"
+			$httpError = ""
+			try
+			{
+				$return = Invoke-RestMethod -Uri $URI -Method GET -Headers $Headers -RetryIntervalSec $this.RetryIntervalSec -MaximumRetryCount $this.MaximumRetryCount -ContentType "application/json"
+			}
+			catch
+			{
+				try
+				{
+					$httpError = $_
+					$return = $httpError.ErrorDetails.Message | ConvertFrom-Json
+				}
+				catch
+				{
+					$return = $httpError
+				}
+			}
 		}
 		else
 		{
+			$httpError = ""
+			try
+			{
 			#$Parameters[0] should be a POST body, JSON formatted
-			return Invoke-RestMethod -Uri $URI -Method POST -Headers $Headers -RetryIntervalSec $this.RetryIntervalSec -MaximumRetryCount $this.MaximumRetryCount -ContentType "application/json" -Body $Parameters[0]
+			$return = Invoke-RestMethod -Uri $URI -Method POST -Headers $Headers -RetryIntervalSec $this.RetryIntervalSec -MaximumRetryCount $this.MaximumRetryCount -ContentType "application/json" -Body $Parameters[0]
+			}
+			catch
+			{
+				try
+				{
+					$httpError = $_
+					$return = $httpError.ErrorDetails.Message | ConvertFrom-Json
+				}
+				catch
+				{
+					$return = $httpError
+				}
+			}
 		}
+		return $return
 	}
 
-	[Bool] ValidateAPIToken($APITokenName, $ThrowIfInvalid)
+	[String] ValidateAPIToken($APITokenName, $ThrowIfInvalid)
 	{
 		$Body = ConvertTo-Json -Compress -InputObject $(@{data = @{apiToken = $this.APITokens.$APITokenName.APIToken}})
-		try
+		$Http = $this.MakeHTTPRequest($APITokenName, "ApiTokenDetails", @($Body))
+		if ($Http.data.expiresAt)
 		{
-			$Http = $this.MakeHTTPRequest($APITokenName, "ApiTokenDetails", @($Body))
+			$this.APITokens.$APITokenName.ExpiresAt = $Http.data.expiresAt
+			return "True"
 		}
-		catch
+		else
 		{
 			if ($ThrowIfInvalid)
 			{
-				throw "Failed to verify API token. Please check Endpoint and APIToken parameters"
+				throw "Failed to verify API token. Please check Endpoint, APIToken and network connection to the console."
 			}
 			else
 			{
-				return $false
+				return $Http
 			}
 		}
-		$this.APITokens.$APITokenName.ExpiresAt = $Http.data.expiresAt
-		return $true
 	}
 
 	[Void] SaveHTTPRetryParameters($RetryIntervalSec, $MaximumRetryCount)
@@ -206,6 +244,13 @@ class SentinelOne
 		Do
 		{
 			$Http = $this.MakeHTTPRequest($APITokenName, "GetAgents", @($FilterCursor))
+			if ($Http.errors)
+			{
+				Write-Host "Error code: $($Http.errors.code)"
+				Write-Host "Error detail: $($Http.errors.detail)"
+				Write-Host "Error title: $($Http.errors.title)"
+				throw "Error while running Get-S1Agent"
+			}
 			$Http.data | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
 			$Return += $Http.data
 			$FilterCursor = $Filter + "&cursor=$($Http.pagination.nextCursor)"
@@ -264,6 +309,13 @@ class SentinelOne
 	[String] submitDVQuery($APITokenName, $Query)
 	{
 		$Http = $this.MakeHTTPRequest($APITokenName, "CreateQueryAndGetQueryid", @($Query))
+		if ($Http.errors)
+		{
+			Write-Host "Error code: $($Http.errors.code)"
+			Write-Host "Error detail: $($Http.errors.detail)"
+			Write-Host "Error title: $($Http.errors.title)"
+			throw "Error while running Get-S1Agent"
+		}
 		$QueryId = $Http.data.queryId
 		if ($QueryId -match "q[a-f0-9]{32}")
 		{
@@ -271,14 +323,15 @@ class SentinelOne
 		}
 		else
 		{
-			throw "Unexpected query ID format"
+			throw "DeepVisibility query submission failed."
 		}
 	}
 
 	[Hashtable] getQueryStatus($APITokenName, $QueryID)
 	{
+		Start-Sleep 3
 		$Http = $this.MakeHTTPRequest($APITokenName, "GetQueryStatus", @($QueryID))
-		return @{progressStatus = $Http.data.progressStatus; responseState = $Http.data.responseState}
+		return @{progressStatus = $Http.data.progressStatus; responseState = $Http.data.responseState; error = $Http.errors}
 	}
 
 	[Bool] RequestFileFetch($APITokenName, $AgentID, $File, $Password)
@@ -341,6 +394,91 @@ class SentinelOne
 		$Http.data | Add-Member -Value $SiteName -Name "siteName" -MemberType NoteProperty
 		$Http.data | Add-Member -Value $SiteId -Name "siteId" -MemberType NoteProperty
 		return $Http.data
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	[PSObject] GetS1Groups($APITokenName, $SiteId, $SiteName)
+	{
+		$Http = $this.MakeHTTPRequest($APITokenName, "GetGroups", @($SiteId))
+		$Http.data | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
+		$Http.data | Add-Member -Value $SiteName -Name "siteName" -MemberType NoteProperty
+		$Http.data | Add-Member -Value $SiteId -Name "siteId" -MemberType NoteProperty
+		return $Http.data
+	}
+
+
+	[PSObject] GetS1Exclusions($APITokenName, $Type, $Scope, $AccountId, $AccountName, $SiteId, $SiteName, $GroupId, $GroupName)
+	{
+		$Return = @()
+		$NextCursor = ""
+		if($Scope -eq "Account")
+		{
+			$SiteId = $AccountId
+		}
+		Do
+		{
+			$Http = $this.MakeHTTPRequest($APITokenName, "GetExclusions", @($Scope, $Type, $SiteId, $GroupId, $NextCursor))
+			$Http.data | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
+			$Return += $Http.data
+			$NextCursor = $Http.pagination.nextCursor
+
+			if ($Scope -eq "Global")
+			{
+				$Http.data | Add-Member -Value "" -Name "accountName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "" -Name "accountId" -MemberType NoteProperty		
+			}
+			else
+			{
+				$Http.data | Add-Member -Value $AccountName -Name "accountName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value $AccountId -Name "accountId" -MemberType NoteProperty				
+			}
+			if ($Scope -eq "Account")
+			{
+				$Http.data | Add-Member -Value "Account" -Name "exceptionScope" -MemberType NoteProperty
+			}
+			elseif ($Scope -eq "Site")
+			{
+				$Http.data | Add-Member -Value $SiteName -Name "siteName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value $SiteId -Name "siteId" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "" -Name "groupName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "" -Name "groupId" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "Site" -Name "exceptionScope" -MemberType NoteProperty
+			}
+			elseif ($Scope -eq "Group")
+			{
+				$Http.data | Add-Member -Value $SiteName -Name "siteName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value $SiteId -Name "siteId" -MemberType NoteProperty
+				$Http.data | Add-Member -Value $groupName -Name "groupName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value $groupId -Name "groupId" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "Group" -Name "exceptionScope" -MemberType NoteProperty
+			}
+			elseif ($Scope -eq "Global")
+			{
+				$Http.data | Add-Member -Value "" -Name "siteName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "" -Name "siteId" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "" -Name "groupName" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "" -Name "groupId" -MemberType NoteProperty
+				$Http.data | Add-Member -Value "Global" -Name "exceptionScope" -MemberType NoteProperty
+			}
+		} While ($null -ne $Http.pagination.nextCursor)
+		return $Return
+	}
+
+	[PSObject] GetS1Sites($APITokenName)
+	{
+		$Http = $this.MakeHTTPRequest($APITokenName, "GetSites", @())
+		$Http.data.sites | Add-Member -Value $APITokenName -Name "APITokenName" -MemberType NoteProperty
+		return $Http.data.sites
 	}
 
 	[PSObject] GetQueryData($APITokenName, $QueryID, $FetchSize)
@@ -416,12 +554,21 @@ function Get-S1APIToken
 		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
 		[ValidateNotNullOrEmpty()]
 		[String] $Path = $(Join-Path $env:APPDATA "SentinelOneAPI.token"),
+
+		[Parameter()]
+		[ValidateRange(1,10)]
+		[Int] $RetryIntervalSec = 1,
+
+		[Parameter()]
+		[ValidateRange(1,10)]
+		[Int] $MaximumRetryCount = 2,
 		
 		[Switch] $ValidateAPIToken,
 		[Switch] $UnmaskAPIToken
 		)
 
 	$API = [SentinelOne]::new($Path)
+	$API.SaveHTTPRetryParameters($RetryIntervalSec, $MaximumRetryCount)
 	$Tokens = @()
 
 	foreach ($Name in $API.APITokens.Keys)
@@ -431,7 +578,7 @@ function Get-S1APIToken
 		{
 			$APITokenHashTable.APIToken = $API.APITokens.$Name.APIToken
 		}
-		if ($ValidateAPIToken)
+		if ($ValidateAPIToken -and ($Name -eq $APITokenName -or $APITokenName -eq "*"))
 		{
 			$APITokenHashTable.IsValid = $API.ValidateAPIToken($Name, $false)
 			$APITokenHashTable.ExpiresAt = $API.APITokens.$Name.ExpiresAt
@@ -580,6 +727,7 @@ function Get-S1DeepVisibility
 		[String] $ResultSize = "1000",
 
 		[ValidateNotNullOrEmpty()]
+		[ValidateRange(1,1000)]
 		[Int] $FetchSize = 500,
 
 		[ValidateNotNullOrEmpty()]
@@ -637,8 +785,8 @@ function Get-S1DeepVisibility
 	}
 	else
 	{
-		$toDate = $(Get-Date)
-		$toDate = $(Get-Date -Date $($(Get-Date -Date $toDate).ToUniversalTime()) -Format O)
+		$Latest = $(Get-Date)
+		$toDate = $(Get-Date -Date $($(Get-Date -Date $Latest).ToUniversalTime()) -Format O)
 	}
 
 	Write-Host "Search time:" -ForegroundColor Green
@@ -676,13 +824,14 @@ function Get-S1DeepVisibility
 	$submittedQueries = @{}
 	
 	$queryDetails = @{
-		fromDate = $(Get-Date -Date $($(Get-Date -Date $fromDate).ToUniversalTime()) -Format O)
-		toDate = $(Get-Date -Date $($(Get-Date -Date $toDate).ToUniversalTime()) -Format O)
+		fromDate = $(Get-Date -Date $($(Get-Date -Date $fromDate).ToUniversalTime()) -Format O);
+		toDate = $(Get-Date -Date $($(Get-Date -Date $toDate).ToUniversalTime()) -Format O);
 		query = $QueryToRun;
 		limit = $ResultSize;
 		queryType = @("events");
 		}
 	$queryDetails = ConvertTo-Json -InputObject $queryDetails -Compress
+	Write-Verbose $queryDetails
 	Write-Host
 	foreach ($Name in $APITokenName)
 	{
@@ -701,10 +850,22 @@ function Get-S1DeepVisibility
 		{
 			if ($FinishedStatus[$Key].responseState -ne "FINISHED")
 			{
-			$FinishedStatus[$Key] = $api.getQueryStatus($Key, $submittedQueries[$Key])
-			write-host "Checking query with API token $Key. Completed $($FinishedStatus[$Key].progressStatus)%, status $($FinishedStatus[$Key].responseState)"
+				$FinishedStatus[$Key] = $api.getQueryStatus($Key, $submittedQueries[$Key])
+				if ($FinishedStatus[$Key].error.code -gt 1 )
+				{
+					#DV query failed to execute.
+					#{"errors":[{"code":4000040,"detail":"Query execution failed, please re-run your query","title":"Bad Request"}]}
+					Write-Host "$($FinishedStatus[$Key].error.detail); Error code $($FinishedStatus[$Key].error.code)" -ForegroundColor Red
+					$submittedQueriesCount--
+					$SuccessfulFetch = $Key
+					Write-Host "Starting the same query again" -ForegroundColor Green
+					$Return += Get-S1DeepVisibility -APITokenName $Key -Query $QueryToRun -Earliest $Earliest -Latest $Latest
+				}
+				else {
+					write-host "Checking query with API token $Key. Completed $($FinishedStatus[$Key].progressStatus)%, status $($FinishedStatus[$Key].responseState)"	
+				}
 			}
-			else
+			if ($FinishedStatus[$Key].responseState -eq "FINISHED")
 			{
 				$submittedQueriesCount--
 				write-host "Query is ready for fetch with API token $Key" -ForegroundColor Green
@@ -737,9 +898,11 @@ function Get-S1SitePolicy
 		[Int] $MaximumRetryCount = 2,
 
 		[Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+		[Alias("id")]
 		[String] $SiteId,
 
 		[Parameter(ValueFromPipelineByPropertyName, DontShow)]
+		[Alias("name")]
 		[String] $SiteName
 	)
 
@@ -901,6 +1064,195 @@ function Invoke-S1FileFetch
 			Write-Host "Fetch timed out, most likely some agents are offline now." -ForegroundColor Red
 		}
 		Write-Host "Reminder: Password for fetched zip files: `"$Password`""
+	}
+}
+
+function Get-S1Site
+{
+	[CmdletBinding()]
+	Param(
+		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name")]
+		[String[]] $APITokenName,
+
+		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
+		[ValidateNotNullOrEmpty()]
+		[String] $Path = $(Join-Path $env:APPDATA "SentinelOneAPI.token"),
+
+		[Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[Int] $RetryIntervalSec = 5,
+
+		[Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[Int] $MaximumRetryCount = 2,
+
+		[Parameter()]
+		[Switch] $IncludeDeletedSites,
+
+		[Parameter()]
+		[String] $SiteId
+		)
+
+	Begin
+	{
+		$API = [SentinelOne]::new($Path)
+		$API.saveHTTPRetryParameters($RetryIntervalSec, $MaximumRetryCount)
+		$Sites = @()
+	}
+	Process
+	{
+		foreach ($APIToken in $APITokenName)
+		{
+			$API.CheckAPITokenName($APIToken)
+			$Sites += $api.GetS1Sites($APIToken)
+		}
+	}
+	End
+	{
+		if ($IncludeDeletedSites)
+		{
+			if ($SiteId)
+			{
+				return $Sites | Where-Object id -eq $SiteId
+			}
+			else
+			{
+				return $Sites	
+			}
+		}
+		else
+		{
+			if ($SiteId)
+			{
+				return $Sites | Where-Object state -ne deleted | Where-Object id -eq $SiteId
+			}
+			else
+			{
+				return $Sites | Where-Object state -ne deleted
+			}
+		}
+	}
+}
+
+function Get-S1Exclusion
+{
+	[CmdletBinding()]
+	Param(
+		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name")]
+		[String[]] $APITokenName,
+
+		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
+		[ValidateNotNullOrEmpty()]
+		[String] $Path = $(Join-Path $env:APPDATA "SentinelOneAPI.token"),
+
+		[Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[Int] $RetryIntervalSec = 5,
+
+		[Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[Int] $MaximumRetryCount = 2,
+
+		[Parameter(Mandatory)]
+		[ValidateSet("path", "white_hash", "browser", "certificate", "file_type")]
+		[String] $Type,
+
+		[Parameter()]
+		[Switch] $IncludeDeletedSites
+	)
+
+		$API = [SentinelOne]::new($Path)
+		$API.saveHTTPRetryParameters($RetryIntervalSec, $MaximumRetryCount)
+		$Exclusions = @()
+
+		foreach ($APIToken in $APITokenName)
+		{
+			$API.CheckAPITokenName($APITokenName)
+
+			#Get Global exclusions
+			$Exclusions += $api.GetS1Exclusions($APIToken, $Type, "Global", "", "", "", "", "", "")
+
+			if ($IncludeDeletedSites)
+			{
+				$Sites = Get-S1Site -APITokenName $APIToken -Path $Path -RetryIntervalSec $RetryIntervalSec -MaximumRetryCount $MaximumRetryCount -IncludeDeletedSites
+			}
+			else
+			{
+				$Sites = Get-S1Site -APITokenName $APIToken -Path $Path -RetryIntervalSec $RetryIntervalSec -MaximumRetryCount $MaximumRetryCount
+			}
+			#Get account exclusions
+			foreach ($Account in $Sites | Select-Object accountId, accountName | Get-Unique)
+			{
+				$Exclusions += $api.GetS1Exclusions($APIToken, $Type, "Account", $Account.accountId, $Account.accountName, "", "", "", "")
+			}
+
+			#Get Site exclusions
+			foreach ($Site in $Sites)
+			{
+				$Exclusions += $api.GetS1Exclusions($APIToken, $Type, "Site", $Site.accountId, $Site.accountName, $Site.id, $Site.name, "", "")
+			}
+			#Get Site exclusions
+			$Groups = $Sites | Get-S1Group -Path $Path -RetryIntervalSec $RetryIntervalSec -MaximumRetryCount $MaximumRetryCount
+			
+			foreach ($Group in $Groups)
+			{
+				$Exclusions += $api.GetS1Exclusions($APIToken, $Type, "Group", $($sites | Where-Object id -eq $Group.siteId).accountId, $($sites | Where-Object id -eq $Group.siteName).accountId, $Group.siteId, $Group.siteName, $Group.id, $Group.name)
+			}
+			#Get Group exclusions
+		}
+
+		return $Exclusions | Select-Object -ExcludeProperty scope
+
+}
+
+function Get-S1Group
+{
+	[CmdletBinding()]
+	Param(
+		[Parameter(Mandatory, HelpMessage="Enter SentinelOne API token name", ValueFromPipelineByPropertyName)]
+		[String] $APITokenName,
+
+		[Parameter(HelpMessage="Full path to encrypted file to load API token")]
+		[ValidateNotNullOrEmpty()]
+		[String] $Path = $(Join-Path $env:APPDATA "SentinelOneAPI.token"),
+
+		[Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[Int] $RetryIntervalSec = 5,
+
+		[Parameter()]
+		[ValidateNotNullOrEmpty()]
+		[Int] $MaximumRetryCount = 2,
+
+		[Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+		[Alias("id")]
+		[String] $SiteId,
+
+		[Parameter(ValueFromPipelineByPropertyName, DontShow)]
+		[String] $name
+	)
+
+	Begin
+	{
+		$API = [SentinelOne]::new($Path)
+		$API.saveHTTPRetryParameters($RetryIntervalSec, $MaximumRetryCount)
+		$Groups = @()
+	}
+	Process
+	{
+		$API.CheckAPITokenName($APITokenName)
+		if ($Groups | Where-Object siteId -eq $SiteId)
+		{
+			#Groups for this site has been already received
+		}
+		else
+		{
+			$Groups += $api.GetS1Groups($APITokenName, $SiteId, $name)
+		}
+	}
+	End
+	{
+		return $Groups
 	}
 }
 
